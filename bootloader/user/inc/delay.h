@@ -4,6 +4,7 @@
 #include "stm32f10x.h"
 
 extern u32 g_ul_sys_time;
+extern u32 g_upgrade_sys_time;
 
 extern void SYS_Time_Init(void);
 extern void delay_us(u32 us); //计时器精准延时

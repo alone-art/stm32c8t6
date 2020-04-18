@@ -21,8 +21,9 @@ int main()
 	printf("app\r\n");
 	while(1)
 	{
-		if(g_ul_sys_time%300==0)
+		if(g_ul_sys_time%100==0)
 		{
+			printf("app version 100\r\n");
 			g_ul_sys_time = 1;
 			LED_REV();
 		}
@@ -36,6 +37,7 @@ int main()
 					status = FLASH_ProgramWord(0x8004000, 0x12345678); 
 				} while(status!=FLASH_COMPLETE);
 				FLASH_Lock();
+				printf("app reset, start upgrade\r\n");
 				NVIC_SystemReset();
 			}
 			read_flag=0;

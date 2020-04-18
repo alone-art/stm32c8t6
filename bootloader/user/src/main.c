@@ -9,6 +9,9 @@
 #include "stm32f10x_conf.h"
 #include "stm32f10x_flash.h"
 
+uint8_t upgrade_flag=0;
+uint8_t led_flag=0;
+
 typedef  void (*IapFun)(void);                                //定义一个函数类型的参数
 IapFun JumpToApp; 
 void Iap_Load_App(u32 AppAddr)
@@ -33,6 +36,7 @@ int main()
 	printf("bootloader\r\n");
 	printf("%x\r\n", *(__IO uint32_t*)0x8004000);
 	if((*(__IO uint32_t*)0x8004000)==0x12345678) {
+		printf("erase flash\r\n");
 		FLASH_Unlock();
 		for(int i=0; i<0x5000/1024; i++) {
 			do {
@@ -41,36 +45,30 @@ int main()
 		}
 		FLASH_Lock();
 		printf("upgrade flag\r\n");
+		upgrade_flag = 1;
 	} else {
 		Iap_Load_App(0x8005000);
 	}
-	uint32_t addr=0x8005000;
 	while(1)
 	{
-		if(g_ul_sys_time%10==0)
-		{
+		if(g_upgrade_sys_time==100) {
 //			g_ul_sys_time = 1;
-			if(g_ul_sys_time==1000) {
+			if(upgrade_flag==0) {
 				FLASH_Unlock();
 				do {
 					status = FLASH_ErasePage(0x8004000);
 				} while(status!=FLASH_COMPLETE);
 				FLASH_Lock();
+				printf("upgrade end, start app");
 				Iap_Load_App(0x8005000);
 			}
+			printf("wating...\r\n");
 			LED_REV();
+			g_upgrade_sys_time = 0;
 		}
 		if(read_flag) {
+				read_flag=0;
 			
-			FLASH_Unlock();
-			do {
-				status = FLASH_ProgramWord(addr, *(uint32_t *)str_buffer); 
-			} while(status!=FLASH_COMPLETE);
-			printf("upgrade %d\r\n", addr);
-			addr+=4;
-			FLASH_Lock();
-			str_buffer_len = 0;
-			read_flag=0;
 		}
 	}
 	
