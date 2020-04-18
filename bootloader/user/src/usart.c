@@ -1,5 +1,7 @@
 #include "usart.h"
 
+#include "stm32f10x_flash.h"
+
 char str_buffer[512]="1230\r\n",*str_loca=str_buffer,read_flag;
 uint16_t str_buffer_len=0;
 void usart_send_byte(char dat)
@@ -118,7 +120,8 @@ void USART1_RD_Deal(void)
 	}
 }
 
-
+extern uint8_t upgrade_flag;
+uint32_t addr=0x8005000;
 void USART1_IRQHandler(void)
 {
 	u16 i=0;
@@ -126,15 +129,28 @@ void USART1_IRQHandler(void)
 	{
 		while(++i)
 		{
-			if(str_buffer_len>=4) break;
 			if(USART1->SR & 1<<5)
 			{
 				*str_loca=USART1->DR;
 				str_loca++;
 				str_buffer_len++;
 				i=0;
+				if(upgrade_flag) {
+					if(str_buffer_len>=4) {
+						FLASH_Unlock();
+						FLASH_Status status;
+						do {
+							status = FLASH_ProgramWord(addr, *(uint32_t *)str_buffer); 
+						} while(status!=FLASH_COMPLETE);
+						addr+=4;
+						FLASH_Lock();
+						str_buffer_len = 0;
+						str_loca=str_buffer;
+					}
+				}
 			}
 		}
+		upgrade_flag = 0;
 		*str_loca='\0';
 		str_loca=str_buffer;
 		read_flag=1;
@@ -213,7 +229,6 @@ void USART2_RD_Deal(void)
 		read_flag2=0;
 	}
 }
-
 
 void USART2_IRQHandler(void)
 {

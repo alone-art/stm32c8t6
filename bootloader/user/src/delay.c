@@ -47,12 +47,14 @@ void SYS_Time_Init()
 }
 
 u32 g_ul_sys_time = 0;
+u32 g_upgrade_sys_time = 0;
 
 void SysTick_Handler(void)
 {
 	if(SysTick->VAL||!(SysTick->CTRL&(1<<16)))//时间到达 
 	{
 		g_ul_sys_time++;   
+		g_upgrade_sys_time++;
 //		if(SYS_Time%3==0)
 //			WWDG->CR=0x7f;
 	}
