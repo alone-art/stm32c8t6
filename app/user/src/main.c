@@ -21,10 +21,17 @@ int main()
 	printf("app\r\n");
 	while(1)
 	{
+<<<<<<< HEAD
 		if(g_ul_sys_time==100)
 		{
 			printf("app version 100\r\n");
 			g_ul_sys_time=0;
+=======
+		if(g_ul_sys_time%100==0)
+		{
+			printf("app version 100\r\n");
+			g_ul_sys_time = 1;
+>>>>>>> f91cdab08da9b1e460562f2229d729091483766e
 			LED_REV();
 		}
 		if(read_flag) {
